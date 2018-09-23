@@ -1,6 +1,4 @@
-/*
-    Modified from code at http://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/
-*/
+// C program for array implementation of queue
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
