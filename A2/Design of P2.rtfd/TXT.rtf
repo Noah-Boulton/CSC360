@@ -1,0 +1,79 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
+{\fonttbl\f0\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww9300\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sl300\sa240\partightenfactor0
+
+\f0\fs24 \cf2 \expnd0\expndtw0\kerning0
+1. How many threads are you going to use? Specify the task that you intend each thread to preform.\
+	I will use 1 thread for each customer and 1 thread for each clerk as well as the main thread this means n customer threads + 2 clear threads + main thread = n + 3 threads total.\
+2. Do the threads work independently? Or is there an overall \'93controller\'94 thread?\
+	Threads work independently\
+3. How many muteness are you going to use? Specify the operation that each mutex will guard.\
+	1 mutex for each queue which guards the length of the queue\
+4. Will the main thread be idle? If not, what will it be doing?\
+	The main thread will: 	Initialize mutex and condition variables 	\
+				Read customer information from customers.txt\
+				Create clerk threads\
+				Create the customer threads \
+				Wait for customers to terminate\
+				Destroy mutex and condition variables\
+				Calculate average waiting time for all customers \
+5. How are you going to represent customers? what type of data structure will you use?\
+	Customers will be a          struct customer 	\{	\
+								int customer_id;\
+								int arrival_time;\
+					     			int service_time;\
+							\}\
+6.  How are you going to ensure that data structures in your program will not be modified concurrently?\
+	By using mutex locks to prevent concurrent assess to global variables (queues)\
+7. How many converse are you going to use? For each convar:\
+	1 convar for each queue\
+	a) Describe the condition that the convar will represent.\
+		Convar represents a clerk selecting a customer from the queue\
+	b) Which mutex is associated with the convar? Why?\
+		The queue mutex will be associated with the convar to ensure that the queue is not being added to when the clerk is selecting from it \
+	c) What operations should be preformed once pthread_cond_wait() has been unblocked and re-acquired the mutex?\
+		Figure out which clerk woke up the customer and print out its id\
+		Update the waiting time\
+		usleep() for the service time of that customer\
+		print out that service has ended\
+		pthread_cond_signal() the clerk so that it can serve another customer\
+		pthread_exit(NULL)\
+		return NULL\
+8. Briefly sketch the overall algorithm you will use. \
+	Main thread:		Initialize mutex and condition variables 	\
+				Read customer information from customers.txt\
+				Create clerk threads\
+				Create the customer threads \
+				Wait for customers to terminate\
+				Destroy mutex and condition variables\
+				Calculate average waiting time for all customers \
+	Customer thread: 	usleep() for the length of arrival time of this customer\
+				Print that the customer arrives\
+				select the shortest queue to enter\
+				pthread_mutex_lock() the selected queue\
+				print that the customer entered that queue \
+				update the length of the selected queue\
+				pthread_cond_wait(convar of selected queue, mutex of selected queue)\
+				pthread_mutex_unlock(mutex of selected queue)\
+				Figure out which clerk woke the customer up\
+				Update the waiting time\
+				usleep() for the service time of that customer\
+				print out that service has ended\
+				pthread_cond_signal() the clerk so that it can serve another customer\
+				pthread_exit(NULL)\
+				return NULL\
+	Clerk thread:		while(true)\
+					check the length of the queues to see if there are customers waiting\
+					select the queue with the longest length\
+					pthread_mutex_lock(mutex of longest queue)\
+					pthread_cond_signal(convar of longest queue) wake the customer at the head of the queue\
+					pthread_mutex_unlock(mutex of longest queue)\
+					pthread_cond_wait() wait until the customer is done being served\
+				pthead_exit(NULL)\
+				return NULL\
+\
+	}
